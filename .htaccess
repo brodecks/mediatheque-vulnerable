@@ -1,0 +1,16 @@
+# Bloquer l'accès direct aux fichiers sensibles
+
+<FilesMatch "\.(env|sql|md|txt|json|lock|env.example)$">
+Require all denied
+</FilesMatch>
+
+# Bloquer l'accès direct aux dossiers
+
+Options -Indexes
+
+# Rediriger tout vers index.php (Front Controller)
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
