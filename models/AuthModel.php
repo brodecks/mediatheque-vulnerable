@@ -8,7 +8,6 @@ require_once __DIR__ . '/../config/database.php';
 
 class AuthModel
 {
-
     /**
      * Vérifie les identifiants de connexion.
      *
@@ -21,10 +20,15 @@ class AuthModel
         $db = getDB();
 
         // ⚠️ [VULN-8] Injection SQL — toujours vulnérable intentionnellement
-        $hashedPassword = md5($password);
-        $query = "SELECT * FROM utilisateurs WHERE login = '$login' AND password = '$hashedPassword'";
-        $result = $db->query($query);
-        return $result->fetch(PDO::FETCH_ASSOC);
+        $query = "SELECT * FROM utilisateurs WHERE login = :login";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':login', $login);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($user && password_verify($password, $user['password'])) {
+            return $user;
+        }
+        return false;
     }
 
     /**
@@ -52,10 +56,13 @@ class AuthModel
         // ⚠️ [VULN-10] Exposition de données sensibles — stockage en MD5
         // MD5 est un algorithme cassé pour les mots de passe.
         // Il faut utiliser password_hash() avec PASSWORD_BCRYPT.
-        $hashedPassword = md5($password);
-
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
         // ⚠️ [VULN-11] Injection SQL (même pattern que login)
-        $db->query("INSERT INTO utilisateurs (login, password, role)
-                    VALUES ('$login', '$hashedPassword', '$role')");
+        $stmt = $db->prepare("INSERT INTO utilisateurs (login, password, role)
+                    VALUES (:login, :password, :role)");
+        $stmt->bindParam(':login', $login);
+        $stmt->bindParam(':password', $hashedPassword);
+        $stmt->bindParam(':role', $role);
+        $stmt->execute();
     }
 }
