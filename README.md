@@ -67,10 +67,22 @@ mediatheque/
 - MySQL
 - Composer
 
-### 1. Cloner le projet
+### 1. Cloner le premier commit
+
+> ⚠️ **Important** — le commit le plus récent contient les corrections. Pour travailler sur la version vulnérable, il faut cloner le **premier commit** du projet.
 
 ```bash
+# Cloner le dépôt
 git clone https://github.com/brodecks/mediatheque-vulnerable.git
+
+# Se placer dans le dossier
+cd mediatheque-vulnerable
+
+# Récupérer le hash du premier commit
+git log --oneline | tail -1
+
+# Se placer sur le premier commit
+git checkout <hash_du_premier_commit>
 ```
 
 Placer le dossier dans `C:\wamp64\www\`.
@@ -90,6 +102,7 @@ DB_HOST=localhost
 DB_NAME=mediatheque
 DB_USER=root
 DB_PASS=
+DB_CHARSET=utf8mb4
 ```
 
 ### 4. Créer la base de données

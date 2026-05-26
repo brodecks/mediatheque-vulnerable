@@ -38,8 +38,12 @@ class AuthModel
     {
         $db = getDB();
         // ⚠️ [VULN-9] Injection SQL (même problème sur l'ID)
-        $result = $db->query("SELECT * FROM utilisateurs WHERE id = $id");
-        return $result->fetch(PDO::FETCH_ASSOC);
+        $query = "SELECT * FROM utilisateurs WHERE id = :id";
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result;
     }
 
     /**

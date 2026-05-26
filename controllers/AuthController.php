@@ -19,11 +19,13 @@ class AuthController
         // Le paramètre GET 'page' est utilisé directement dans require()
         // Payload : index.php?page=../../etc/passwd
         //           index.php?page=../../config/database
-        if (isset($_GET['page'])) {
-            require($_GET['page'] . '.php');
-        } else {
-            require __DIR__ . '/../views/auth/login.php';
+        $allowedPages = ['login', 'register'];
+        $page = $_GET['page'] ?? 'login';
+
+        if (!in_array($page, $allowedPages)) {
+            $page = 'login';
         }
+        require __DIR__ . '/../views/auth/' . $page . '.php';
     }
 
     /**
@@ -40,6 +42,7 @@ class AuthController
             // ⚠️ [VULN-18] Faille d'authentification — pas de régénération d'ID de session
             // Sans session_regenerate_id(), l'attaquant peut fixer l'ID de session
             // avant la connexion (Session Fixation)
+            session_regenerate_id(true);
             $_SESSION['user'] = $user['login'];
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['role'] = $user['role'];
@@ -61,7 +64,10 @@ class AuthController
         // ⚠️ [VULN-20] Faille d'authentification — déconnexion incomplète
         // unset() sur une clé de session ne détruit pas la session côté serveur.
         // Le cookie de session reste valide : un attaquant peut rejouer l'ancien ID.
-        unset($_SESSION['user']);
+        session_unset();
+        session_destroy();
+        setcookie(session_name(), '', time() - 3600, '/');
         header('Location: index.php?action=login');
+        exit();
     }
 }

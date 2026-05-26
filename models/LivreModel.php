@@ -6,7 +6,8 @@
 
 require_once __DIR__ . '/../config/database.php';
 
-class LivreModel {
+class LivreModel
+{
 
     /**
      * Retourne tous les livres, avec recherche optionnelle.
@@ -14,55 +15,73 @@ class LivreModel {
      * @param string $search  Terme de recherche
      * @return array
      */
-    public static function getAll($search = '') {
+    public static function getAll($search = '')
+    {
         $db = getDB();
         if ($search !== '') {
             // ⚠️ [VULN-12] Injection SQL dans la recherche
             // Payload : ' UNION SELECT login, password, role, null, null FROM utilisateurs --
             // Permet d'exfiltrer la table utilisateurs via la page de recherche
-            $query = "SELECT * FROM livres WHERE titre LIKE '%$search%' OR auteur LIKE '%$search%'";
+            $stmt = $db->prepare("SELECT * FROM livres WHERE titre LIKE :search OR auteur LIKE :search");
+            $stmt->bindValue(':search', '%' . $search . '%');
         } else {
-            $query = "SELECT * FROM livres";
+            $stmt = $db->prepare("SELECT * FROM livres");
         }
-        return $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
      * Retourne un livre par son ID.
      */
-    public static function getById($id) {
+    public static function getById($id)
+    {
         $db = getDB();
-        // ⚠️ [VULN-13] Injection SQL sur l'ID
-        $result = $db->query("SELECT * FROM livres WHERE id = $id");
-        return $result->fetch(PDO::FETCH_ASSOC);
+        $stmt = $db->prepare("SELECT * FROM livres WHERE id = :id");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
      * Ajoute un nouveau livre.
      */
-    public static function create($titre, $auteur, $genre, $annee) {
+    public static function create($titre, $auteur, $genre, $annee)
+    {
         $db = getDB();
-        // ⚠️ [VULN-14] Injection SQL à l'insertion
-        $db->query("INSERT INTO livres (titre, auteur, genre, annee)
-                    VALUES ('$titre', '$auteur', '$genre', '$annee')");
+        $stmt = $db->prepare("INSERT INTO livres (titre, auteur, genre, annee)
+                VALUES (:titre, :auteur, :genre, :annee)");
+        $stmt->bindValue(':titre', $titre);
+        $stmt->bindValue(':auteur', $auteur);
+        $stmt->bindValue(':genre', $genre);
+        $stmt->bindValue(':annee', $annee, PDO::PARAM_INT);
+        $stmt->execute();
     }
 
     /**
      * Modifie un livre existant.
      */
-    public static function update($id, $titre, $auteur, $genre, $annee) {
+    public static function update($id, $titre, $auteur, $genre, $annee)
+    {
         $db = getDB();
-        // ⚠️ [VULN-15] Injection SQL à la mise à jour
-        $db->query("UPDATE livres SET titre='$titre', auteur='$auteur',
-                    genre='$genre', annee='$annee' WHERE id=$id");
+        $stmt = $db->prepare("UPDATE livres SET titre = :titre, auteur = :auteur,
+                genre = :genre, annee = :annee WHERE id = :id");
+        $stmt->bindValue(':titre', $titre);
+        $stmt->bindValue(':auteur', $auteur);
+        $stmt->bindValue(':genre', $genre);
+        $stmt->bindValue(':annee', $annee, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
     }
 
     /**
      * Supprime un livre.
      */
-    public static function delete($id) {
+    public static function delete($id)
+    {
         $db = getDB();
-        // ⚠️ [VULN-16] Injection SQL à la suppression
-        $db->query("DELETE FROM livres WHERE id = $id");
+        $stmt = $db->prepare("DELETE FROM livres WHERE id = :id");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
     }
 }
