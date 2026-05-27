@@ -7,12 +7,14 @@
 require_once __DIR__ . '/../models/LivreModel.php';
 require_once __DIR__ . '/../includes/session.php';
 
-class LivreController {
+class LivreController
+{
 
     /**
      * Liste tous les livres (avec recherche).
      */
-    public function index() {
+    public function index()
+    {
         requireLogin();
         // Récupère le terme de recherche sans aucun nettoyage
         $search = $_GET['search'] ?? '';
@@ -23,7 +25,8 @@ class LivreController {
     /**
      * Affiche le formulaire d'ajout.
      */
-    public function create() {
+    public function create()
+    {
         requireLogin();
         require __DIR__ . '/../views/livres/form.php';
     }
@@ -31,7 +34,8 @@ class LivreController {
     /**
      * Traite l'ajout d'un livre.
      */
-    public function store() {
+    public function store()
+    {
         requireLogin();
 
         // ⚠️ [VULN-21] CSRF — aucun token CSRF n'est vérifié
@@ -43,11 +47,16 @@ class LivreController {
         //   ...
         // </form>
         // <script>document.forms[0].submit();</script>
-
-        $titre  = $_POST['titre']  ?? '';
+        // Vérification
+        $token = $_POST['csrf_token'] ?? '';
+        if (!$token || $token !== $_SESSION['csrf_token']) {
+            http_response_code(403);
+            die("Token CSRF invalide.");
+        }
+        $titre = $_POST['titre'] ?? '';
         $auteur = $_POST['auteur'] ?? '';
-        $genre  = $_POST['genre']  ?? '';
-        $annee  = $_POST['annee']  ?? '';
+        $genre = $_POST['genre'] ?? '';
+        $annee = $_POST['annee'] ?? '';
 
         LivreModel::create($titre, $auteur, $genre, $annee);
         header('Location: index.php?action=livres');
@@ -56,9 +65,10 @@ class LivreController {
     /**
      * Affiche le formulaire de modification.
      */
-    public function edit() {
+    public function edit()
+    {
         requireLogin();
-        $id    = $_GET['id'] ?? 0;
+        $id = $_GET['id'] ?? 0;
         $livre = LivreModel::getById($id);
         require __DIR__ . '/../views/livres/form.php';
     }
@@ -66,14 +76,20 @@ class LivreController {
     /**
      * Traite la modification d'un livre.
      */
-    public function update() {
+    public function update()
+    {
         requireLogin();
         // ⚠️ [VULN-22] CSRF — même absence de token que store()
-        $id     = $_POST['id']     ?? 0;
-        $titre  = $_POST['titre']  ?? '';
+        $token = $_POST['csrf_token'] ?? '';
+        if (!$token || $token !== $_SESSION['csrf_token']) {
+            http_response_code(403);
+            die("Token CSRF invalide.");
+        }
+        $id = $_POST['id'] ?? 0;
+        $titre = $_POST['titre'] ?? '';
         $auteur = $_POST['auteur'] ?? '';
-        $genre  = $_POST['genre']  ?? '';
-        $annee  = $_POST['annee']  ?? '';
+        $genre = $_POST['genre'] ?? '';
+        $annee = $_POST['annee'] ?? '';
 
         LivreModel::update($id, $titre, $auteur, $genre, $annee);
         header('Location: index.php?action=livres');
@@ -82,12 +98,18 @@ class LivreController {
     /**
      * Supprime un livre.
      */
-    public function delete() {
+    public function delete()
+    {
         requireAdmin();
         // ⚠️ [VULN-23] CSRF — suppression déclenchable via un simple lien GET forgé
         // Payload : <img src="http://mediatheque.local/index.php?action=delete&id=1">
         // Un simple chargement d'image dans une page tierce suffit à supprimer un livre.
-        $id = $_GET['id'] ?? 0;
+        $token = $_POST['csrf_token'] ?? '';
+        if (!$token || $token !== $_SESSION['csrf_token']) {
+            http_response_code(403);
+            die("Token CSRF invalide.");
+        }
+        $id = $_POST['id'] ?? 0;
         LivreModel::delete($id);
         header('Location: index.php?action=livres');
     }

@@ -16,6 +16,9 @@ if (session_status() === PHP_SESSION_NONE) {
     $_SESSION['last_activity'] = time();
 }
 
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 /**
  * Vérifie si l'utilisateur est connecté.
  * Redirige vers la page de login sinon.
