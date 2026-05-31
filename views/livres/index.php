@@ -29,13 +29,13 @@
          Le terme de recherche est réaffiché sans htmlspecialchars().
          Payload : ?action=livres&search=<script>alert('XSS')</script>
          Le script s'exécute dans le navigateur de la victime. -->
-        <input type="text" name="search" value="<?= $search ?>">
+        <input type="text" name="search" value="<?= htmlspecialchars($search) ?>">
         <button type="submit">Rechercher</button>
     </form>
 
     <?php if (!empty($search)): ?>
         <!-- ⚠️ [VULN-26] XSS réfléchi — deuxième occurrence -->
-        <p>Résultats pour : <strong><?= $search ?></strong></p>
+        <p>Résultats pour : <strong><?= htmlspecialchars($search) ?></strong></p>
     <?php endif; ?>
 
     <table>
@@ -56,11 +56,11 @@
                  Les données issues de la base de données sont affichées sans échappement.
                  Si un attaquant a inséré du JavaScript via le formulaire d'ajout,
                  il s'exécutera pour tous les utilisateurs qui consultent cette page. -->
-                    <td><?= $livre['id'] ?></td>
-                    <td><?= $livre['titre'] ?></td>
-                    <td><?= $livre['auteur'] ?></td>
-                    <td><?= $livre['genre'] ?></td>
-                    <td><?= $livre['annee'] ?></td>
+                    <td><?= htmlspecialchars($livre['id']) ?></td>
+                    <td><?= htmlspecialchars($livre['titre']) ?></td>
+                    <td><?= htmlspecialchars($livre['auteur']) ?></td>
+                    <td><?= htmlspecialchars($livre['genre']) ?></td>
+                    <td><?= htmlspecialchars($livre['annee']) ?></td>
                     <td>
                         <a href="index.php?action=edit&id=<?= $livre['id'] ?>">Modifier</a>
                         <?php if ($_SESSION['role'] === 'admin'): ?>

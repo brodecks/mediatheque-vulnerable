@@ -51,7 +51,7 @@ class AuthController
         } else {
             // ⚠️ [VULN-19] Exposition d'informations — message d'erreur trop précis
             // Indiquer "login incorrect" vs "mot de passe incorrect" aide l'énumération
-            $_SESSION['error'] = "Login ou mot de passe incorrect.";
+            $_SESSION['error'] = "Login '" . $_POST['login'] . "' incorrect.";
             header('Location: index.php?action=login');
         }
     }

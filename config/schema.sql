@@ -13,7 +13,7 @@ USE mediatheque;
 CREATE TABLE utilisateurs (
     id       INT AUTO_INCREMENT PRIMARY KEY,
     login    VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(32)  NOT NULL,   -- MD5 : 32 caractères (devrait être VARCHAR(255) pour bcrypt)
+    password VARCHAR(255)  NOT NULL,   -- MD5 : 32 caractères (devrait être VARCHAR(255) pour bcrypt)
     role     ENUM('user', 'admin') DEFAULT 'user'
 );
 
@@ -30,8 +30,8 @@ CREATE TABLE livres (
 -- ⚠️ Mots de passe MD5 : 'admin' = 21232f297a57a5a743894a0e4a801fc3
 --                        'user123' = 3fc0a7acf087f549ac2b266baf94b8b1
 INSERT INTO utilisateurs (login, password, role) VALUES
-    ('admin', '21232f297a57a5a743894a0e4a801fc3', 'admin'),
-    ('alice', '3fc0a7acf087f549ac2b266baf94b8b1', 'user');
+    ('admin', '$2y$10$otanSptOo0n3s2GZv41Bv.cYmXiK0QRFo32afLsXE9lM8Nt1GaTqa', 'admin'),
+    ('alice', '$2y$10$wFDZ9L5SvPcwlE1PmcWdX.va5Ml.fOkHFviN5y1ZmMabcYXAmPVjK', 'user');
 
 INSERT INTO livres (titre, auteur, genre, annee) VALUES
     ('Le Petit Prince',          'Antoine de Saint-Exupéry', 'Conte',   1943),

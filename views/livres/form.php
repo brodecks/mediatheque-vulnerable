@@ -30,16 +30,20 @@
             <!-- ⚠️ [VULN-30] XSS — les valeurs pré-remplies ne sont pas échappées
          Payload dans la BDD : "><script>alert(1)</script>
          Cela ferme l'attribut value et injecte du JavaScript. -->
-            <input type="text" name="titre" value="<?= isset($livre) ? $livre['titre'] : '' ?>">
+            <input type="text" name="titre"
+                value="<?= isset($livre) ? htmlspecialchars($livre['titre'], ENT_QUOTES, 'UTF-8') : '' ?>">
 
             <label>Auteur</label>
-            <input type="text" name="auteur" value="<?= isset($livre) ? $livre['auteur'] : '' ?>">
+            <input type="text" name="auteur"
+                value="<?= isset($livre) ? htmlspecialchars($livre['auteur'], ENT_QUOTES, 'UTF-8') : '' ?>">
 
             <label>Genre</label>
-            <input type="text" name="genre" value="<?= isset($livre) ? $livre['genre'] : '' ?>">
+            <input type="text" name="genre"
+                value="<?= isset($livre) ? htmlspecialchars($livre['genre'], ENT_QUOTES, 'UTF-8') : '' ?>">
 
             <label>Année</label>
-            <input type="number" name="annee" value="<?= isset($livre) ? $livre['annee'] : '' ?>">
+            <input type="number" name="annee"
+                value="<?= isset($livre) ? htmlspecialchars($livre['annee'], ENT_QUOTES, 'UTF-8') : '' ?>">
 
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
             <button type="submit"><?= isset($livre) ? 'Modifier' : 'Ajouter' ?></button>

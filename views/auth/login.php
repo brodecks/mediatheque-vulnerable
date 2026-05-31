@@ -23,7 +23,7 @@
              Ici la session est contrôlée côté serveur, mais le pattern
              est dangereux : si un autre endroit du code injecte du contenu
              utilisateur dans $_SESSION['error'], le XSS est exploitable. -->
-            <div class="error"><?= $_SESSION['error'] ?></div>
+            <div class="error"><?= htmlspecialchars($_SESSION['error']) ?></div>
             <?php unset($_SESSION['error']); ?>
         <?php endif; ?>
 
